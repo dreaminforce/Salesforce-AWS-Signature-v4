@@ -32,38 +32,31 @@ public class AWSBedrockService {
         };
 
         String canonicalHeaders = buildCanonicalHeaders(headers);
-        System.debug('canonicalHeaders---'+canonicalHeaders);
         String signedHeaders = String.join(headers.keySet(), ';');
-        System.debug('signedHeaders---'+signedHeaders);
 
         //canonical request
         String canonicalRequest = HTTP_METHOD + '\n' +
             canonicalUri + '\n' +
-            '' + '\n' + // No query string for Bedrock
+            '' + '\n' + // No query needed for bedrock
             canonicalHeaders + '\n' +
             signedHeaders + '\n' +
             contentHash;
-        
-        System.debug('canonicalRequest---'+canonicalRequest);
+
         //string to sign
         String algorithm = 'AWS4-HMAC-SHA256';
         String stringToSign = algorithm + '\n' +
             amzDate + '\n' +
             credentialScope + '\n' +
             EncodingUtil.convertToHex(Crypto.generateDigest('SHA-256', Blob.valueOf(canonicalRequest)));
-        System.debug('stringToSign---'+stringToSign);
 
         //signature
         Blob signingKey = getSignatureKey(AWS_SECRET_KEY, dateStamp, AWS_REGION, SERVICE_NAME);
         String signature = EncodingUtil.convertToHex(Crypto.generateMac('HmacSHA256', Blob.valueOf(stringToSign), signingKey));
-        System.debug('signature---'+signature);
 
         // authorization header
         String authorizationHeader = algorithm + ' Credential=' + AWS_ACCESS_KEY + '/' + credentialScope +
             ', SignedHeaders=' + signedHeaders +
             ', Signature=' + signature;
-        System.debug('authorizationHeader---'+authorizationHeader);
-        //headers.put('Authorization', authorizationHeader);
 
         //HTTP request
         HttpRequest req = new HttpRequest();
@@ -71,16 +64,15 @@ public class AWSBedrockService {
         req.setMethod(HTTP_METHOD);
         req.setHeader('Authorization', authorizationHeader);
         req.setHeader('x-amz-date', amzDate);
-        req.setHeader('Accept', 'application/json'); // Added Accept header
+        req.setHeader('Accept', 'application/json');
         req.setHeader('x-amz-target', 'AWSBedrock.InvokeModel');
         req.setHeader('Content-Type', 'application/json');
         req.setBody(payload);
 
         Http http = new Http();
         HttpResponse res = http.send(req);
-
         if (res.getStatusCode() == 200) {
-            system.debug('REST----'+res.getBody());
+            system.debug('Model Output'+res.getBody());
             return res.getBody();
         } else {
             throw new CalloutException('Failed with status code ' + res.getStatusCode() + ': ' + res.getBody());
