@@ -86,4 +86,4 @@ System.debug('Model Response: ' + response);
 - [AWS Signature Version 4 Documentation](https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html)
 - [AWS Bedrock Service Documentation](https://aws.amazon.com/bedrock/)
 - [Salesforce HMAC SHA256 Implementation](https://developer.salesforce.com/docs/atlas.en-us.apexref.meta/apexref/apex_classes_restful_crypto.htm)
-```
+
